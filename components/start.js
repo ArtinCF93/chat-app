@@ -30,7 +30,10 @@ export default class Start extends React.Component {
         return (
                 <ImageBackground source={require('../assets/backgroundImage.png')} style={styles.container}>
                     <Text style={styles.title}>Chat App</Text>
-                    <TextInput 
+                    <TextInput
+                        accessible = {true}
+                        accessibilityLabel = 'Enter Name'
+                        accessibilityHint = 'Input to type and enter your name into the system for login'
                         style={styles.textInput}
                         onChangeText={this.onChangeHandler}
                         placeholder='Enter Name'
@@ -38,25 +41,40 @@ export default class Start extends React.Component {
                     <View>
                         <Text style={styles.text}>Select a Background Color</Text>
                         <View style={styles.colorRow}>
-                            <Pressable 
+                            <Pressable
+                                accessible = {true}
+                                accessibilityLabel = 'Set background as grey'
+                                accessibilityHint = 'Tapping button allows you to set the background color of the chat app to grey'
                                 style={styles.color1}
                                 onPress={() => this.setState({ backgroundColor: '#f0f8ff'})}//passing the object value to replace the state value
                             />
-                            <Pressable 
+                            <Pressable
+                                accessible = {true}
+                                accessibilityLabel = 'Set background as pink'
+                                accessibilityHint = 'Tapping button allows you to set the background color of the chat app to pink'
                                 style={styles.color2}
                                 onPress={() => this.setState({ backgroundColor: '#ffe4e1'})}
                             />
-                            <Pressable 
+                            <Pressable
+                                accessible = {true}
+                                accessibilityLabel = 'Set background as orange'
+                                accessibilityHint = 'Tapping button allows you to set the background color of the chat app to orange'
                                 style={styles.color3}
                                 onPress={() => this.setState({ backgroundColor: 'orange'})}
                             />
-                            <Pressable 
+                            <Pressable
+                                accessible = {true}
+                                accessibilityLabel = 'Set background as yellow'
+                                accessibilityHint = 'Tapping button allows you to set the background color of the chat app to yellow' 
                                 style={styles.color4}
                                 onPress={() => this.setState({ backgroundColor: '#eee8aa'})}
                             />
                         </View>
                     </View>
-                    <Button 
+                    <Button
+                        accessible = {true}
+                        accessibilityLabel = 'Enter Chat room'
+                        accessibilityHint = 'Tapping button navigates you to the chat page'
                         title='Start Chatting'
                         onPress={this.onPressHandler}
                     />
@@ -68,7 +86,7 @@ export default class Start extends React.Component {
 let styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: 'blue',
+      backgroundColor: 'white',
       opacity: 50,
       alignItems: 'center',
       justifyContent: 'center',
