@@ -61,17 +61,19 @@ componentDidMount() {
                     if (!user) {
                         await firebase.default.auth().signInAnonymously();
                     }
+                    let userInfo = {
+                        _id: user.uid,
+                        name: name,
+                        avatar: "https://placeimg.com/140/140/any",
+                    };
                     //update user state with currently active user data
                     this.setState({
                         uid: user.uid,
                         loggedInText: 'Hello there ' + name,
                         messages: [],
-                        user: {
-                            _id: user.uid,
-                            name: name,
-                            avatar: "https://placeimg.com/140/140/any",
-                        },
+                        user: userInfo
                     });
+                    await AsyncStorage.setItem('user', JSON.stringify(userInfo));
                     //this references the specific user messages by uid within specific collection
                     //the function below matches the message with the uid in the user object, to only show messag
                     this.unsubscribeChatMessageUser = firebase.default.firestore().collection("messages").where("uid", "==", this.state.uid);
@@ -101,7 +103,7 @@ componentDidMount() {
         querySnapshot.forEach((doc) => {
             let data = doc.data();
             messages.push({
-                uid: data.uid,
+                _id: data._id,
                 text: data.text,
                 createdAt: data.createdAt.toDate(),
                 user: {
@@ -114,21 +116,20 @@ componentDidMount() {
         this.setState({
             messages: messages
         });
+        this.saveMessages(messages);
     };
 
 
     onSend = (messages = []) => {
-        this.setState(previousState => ({
-            messages: GiftedChat.append(previousState.messages, messages),
-        }), () => {
-            this.addMessages();
-            this.saveMessages();
-        })
+        // this.setState(previousState => ({
+        //     messages: GiftedChat.append(previousState.messages, messages),
+        // }), () => {
+            this.addMessages(messages[0]);
+        // })
     }
 
 
-    addMessages = () => {
-        let message = this.state.messages[0];
+    addMessages = (message) => {
         // add a new messages to the collection
         this.referenceChatMessages.add({
             _id: message._id,
@@ -139,10 +140,10 @@ componentDidMount() {
     }
 
 
-    saveMessages = async() => { //this stores the message data;
+    saveMessages = async(messages) => { //this stores the message data;
         try {
             //using JSON.stringify to convert the saved messages object into a string to be stored; entries in data base are strings
-            await AsyncStorage.setItem('messages', JSON.stringify(this.state.messages));
+            await AsyncStorage.setItem('messages', JSON.stringify(messages));
         } catch (error) {
             console.log(error.message)
         }
@@ -150,13 +151,15 @@ componentDidMount() {
 
 
     getMessages = async() => { //this reads and returns the message date
-        let messages = '';
         try { //async requires a try and catch
             //getItem is used to read data
-            messages = await AsyncStorage.getItem('messages') || [];
+            let messages = await AsyncStorage.getItem('messages') || [];
+            let user = await AsyncStorage.getItem('user') || [];
+            console.log(messages)
             this.setState({
                 //using JSON.parse to convert the saved messages string into an object; messages are displayed as whole objects
-                messages: JSON.parse(messages)
+                messages: JSON.parse(messages),
+                user: JSON.parse(user)
             });
         } catch (error) {
             console.log(error.message)
