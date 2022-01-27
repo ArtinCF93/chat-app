@@ -4,6 +4,8 @@ import { GiftedChat, Bubble, InputToolbar } from 'react-native-gifted-chat';
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import NetInfo from "@react-native-community/netinfo";
 
+import CustomActions from './CustomActions.js';
+
 let firebase = require('firebase');
 require('firebase/firestore');
 
@@ -22,6 +24,8 @@ class Chat extends React.Component {
                 avatar: "",
             },
             isConnected: false,
+            image: null,
+            location: null
         }
 
         if (!firebase.default.apps.length) { //firebase integration
@@ -38,9 +42,9 @@ class Chat extends React.Component {
     };
 
 
-//turned everything into an arrow function
+    //turned everything into an arrow function
 
-componentDidMount() {
+    componentDidMount() {
         let name = this.props.route.params.name;
 
         //this statement will use firestore if the user is online or async with the getMessages() if not
@@ -111,6 +115,8 @@ componentDidMount() {
                     name: data.user.name,
                     avatar: data.user.avatar
                 },
+                image: data.image,
+                location: data.location
             });
         });
         this.setState({
@@ -124,7 +130,7 @@ componentDidMount() {
         // this.setState(previousState => ({
         //     messages: GiftedChat.append(previousState.messages, messages),
         // }), () => {
-            this.addMessages(messages[0]);
+        this.addMessages(messages[0]);
         // })
     }
 
@@ -135,12 +141,14 @@ componentDidMount() {
             _id: message._id,
             text: message.text,
             createdAt: message.createdAt,
-            user: this.state.user
+            user: this.state.user,
+            image: message.image,
+            location: message.location
         });
     }
 
 
-    saveMessages = async(messages) => { //this stores the message data;
+    saveMessages = async (messages) => { //this stores the message data;
         try {
             //using JSON.stringify to convert the saved messages object into a string to be stored; entries in data base are strings
             await AsyncStorage.setItem('messages', JSON.stringify(messages));
@@ -150,7 +158,7 @@ componentDidMount() {
     }
 
 
-    getMessages = async() => { //this reads and returns the message date
+    getMessages = async () => { //this reads and returns the message date
         try { //async requires a try and catch
             //getItem is used to read data
             let messages = await AsyncStorage.getItem('messages') || [];
@@ -167,7 +175,7 @@ componentDidMount() {
     }
 
 
-    deleteMessages = async() => {
+    deleteMessages = async () => {
         try {
             await AsyncStorage.removeItem('messages');
             this.setState({
@@ -197,16 +205,40 @@ componentDidMount() {
 
 
     renderInputToolbar = (props) => {
-		if (this.state.isConnected == false) {
+        if (this.state.isConnected == false) {
             return (
                 <View>
                     <Text>Sorry, You are offline</Text>
                 </View>
             )
-		} else {
-			return <InputToolbar {...props} />;
-		}
-	}
+        } else {
+            return <InputToolbar {...props} />;
+        }
+    }
+
+    renderCustomActions = (props) => {//applies the CustomActions component to the message input toolbar
+        let image = this.state.image
+        return <CustomActions {...props} />
+    }
+
+    renderCustomView = (props) => { //built in prop that lets you render a MapView
+
+        let { currentMessage } = props;
+        if (currentMessage.location) {
+            return (
+                <MapView
+                    style={styles.mapImage}
+                    region={{
+                        latitude: currentMessage.location.longitude,
+                        longitude: currentMessage.location.longitude,
+                        latitudeDelta: 0.0922,
+                        longitudeDelta: 0.0421,
+                    }}
+                />
+            )
+        }
+        return null
+    }
 
 
     render() {
@@ -223,6 +255,8 @@ componentDidMount() {
                     accessibilityHint='This is where you type your messages and are able read your responses from other users'
                     renderInputToolbar={this.renderInputToolbar}
                     renderBubble={this.renderBubble.bind(this)}
+                    renderActions={this.renderCustomActions}
+                    renderCustomView={this.renderCustomView}
                     messages={this.state.messages}
                     onSend={messages => this.onSend(messages)}
                     user={{
@@ -244,5 +278,13 @@ let styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: 'white'
+    },
+    alignedText: {
+        textAlign: 'center'
+    },
+    mapImage: {
+        resizeMode: 'contain',
+        width: 200,
+        height: 200
     }
 });
