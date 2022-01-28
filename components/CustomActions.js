@@ -2,7 +2,6 @@ import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Image } from 'react-native';
 import * as ImagePicker from 'expo-image-picker'
 import * as Location from 'expo-location';
-import MapView from 'react-native-maps';
 import PropTypes from 'prop-types';
 //with PropTypes, you can define what the props you send to a component should look like. 
 
@@ -31,7 +30,7 @@ export default class CustomActions extends React.Component {
       let imageNameBefore = uri.split("/");
       let imageName = imageNameBefore[imageNameBefore.length - 1];
   
-      let ref = firebase.storage().ref().child(`images/${imageName}`);
+      let ref = firebase.default.storage().ref().child(`images/${imageName}`);
   
       let snapshot = await ref.put(blob);
   
@@ -50,7 +49,7 @@ export default class CustomActions extends React.Component {
     
         //this sets the state of image to whatever image user chooses
         if (!result.cancelled) {
-            const imageUrl = await this.uploadImageFetch(result.uri);
+            let imageUrl = await this.uploadImageFetch(result.uri);
             this.props.onSend({ image: imageUrl });
           }
       }
@@ -65,9 +64,8 @@ export default class CustomActions extends React.Component {
     
         //this sets the state of image to whatever image user chooses
         if (!result.cancelled) {
-          this.setState({
-            image: result
-          })
+          let imageUrl = await this.uploadImageFetch(result.uri);
+          this.props.onSend({ image: imageUrl });
         }
       }
 
@@ -75,10 +73,13 @@ export default class CustomActions extends React.Component {
       getLocation = async () => {
         let result = await Location.getCurrentPositionAsync({})
           .catch(error => console.log(error));
-        if (result) {
-          this.setState({
-            location: result
-          });
+          if (result) {
+            this.props.onSend({
+                location: {
+                    longitude: result.coords.longitude,
+                    latitude: result.coords.latitude
+                },
+            });
         }
       }
 

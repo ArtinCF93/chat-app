@@ -1,9 +1,9 @@
 import React from "react";
-import { StyleSheet, View, Text, Button, Platform, KeyboardAvoidingView } from 'react-native';
+import { StyleSheet, View, Text, Button, Platform, KeyboardAvoidingView, Image } from 'react-native';
 import { GiftedChat, Bubble, InputToolbar } from 'react-native-gifted-chat';
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import NetInfo from "@react-native-community/netinfo";
-
+import MapView from 'react-native-maps';
 import CustomActions from './CustomActions.js';
 
 let firebase = require('firebase');
@@ -105,6 +105,7 @@ class Chat extends React.Component {
         const messages = [];
         //go through each document; querySnapshot is all the data currently in my collection
         querySnapshot.forEach((doc) => {
+            console.log(doc.data())
             let data = doc.data();
             messages.push({
                 _id: data._id,
@@ -127,25 +128,28 @@ class Chat extends React.Component {
 
 
     onSend = (messages = []) => {
-        // this.setState(previousState => ({
-        //     messages: GiftedChat.append(previousState.messages, messages),
-        // }), () => {
-        this.addMessages(messages[0]);
-        // })
-    }
+        this.setState(
+            (previousState) => ({
+                messages: GiftedChat.append(previousState.messages, messages),
+            }),
+            () => {
+                this.addMessages(messages[0]);
+            }
+        );
+    };
 
 
     addMessages = (message) => {
         // add a new messages to the collection
         this.referenceChatMessages.add({
             _id: message._id,
-            text: message.text,
+            text: message.text || null,
             createdAt: message.createdAt,
             user: this.state.user,
-            image: message.image,
-            location: message.location
+            image: message.image || null,
+            location: message.location || null,
         });
-    }
+    };
 
 
     saveMessages = async (messages) => { //this stores the message data;
@@ -217,7 +221,6 @@ class Chat extends React.Component {
     }
 
     renderCustomActions = (props) => {//applies the CustomActions component to the message input toolbar
-        let image = this.state.image
         return <CustomActions {...props} />
     }
 
@@ -229,11 +232,11 @@ class Chat extends React.Component {
                 <MapView
                     style={styles.mapImage}
                     region={{
-                        latitude: currentMessage.location.longitude,
+                        latitude: currentMessage.location.latitude,
                         longitude: currentMessage.location.longitude,
                         latitudeDelta: 0.0922,
                         longitudeDelta: 0.0421,
-                    }}
+                      }}
                 />
             )
         }
@@ -265,6 +268,10 @@ class Chat extends React.Component {
                         name: name,
                         avatar: this.state.user.avatar,
                     }}
+                />
+                <Image
+                    source={this.state.mapImage}
+                    style={styles.image}
                 />
                 {Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height" /> : null}
             </View>
