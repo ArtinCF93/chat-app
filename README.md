@@ -30,7 +30,7 @@ Now, you need an Expo account. Head over to the Expo signup page and follow the 
 <br>
 Make sure that your phone and computer are on the same network (LAN or WiFi) and open up the Expo app on your phone. See if your new project is listed under “Recently in Development.” If your project isn’t listed, scan the QR Code provided in your browser (or your terminal) using the Expo Client app for Android or the built-in QR code scanner of your iPhone camera.
 </p>
-<h1>Key Features</h1>
+<h1>Dependencies</h1>
 <p>
   <ul>
     <li>expo</li>
